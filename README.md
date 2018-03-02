@@ -1,8 +1,7 @@
 ## Primeiro programa
 
-```markdown
 
-'#include <iostream>
+`#include <iostream>
   
   using namespace std;
   
@@ -10,7 +9,7 @@
   {
     cout << "Hello World";
     return 0;
-  }'
+  }`
 
 You can use the [editor on GitHub](https://github.com/eldersantoss/PROG-AVANCADA/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
