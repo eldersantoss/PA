@@ -448,17 +448,509 @@ Para compilar e executar os códigos aqui presentes, utilizar este <a href="http
 </div>
 </div>
 <div class="sect1">
-<h2 id="_1_negativando_região">1. Negativando Região</h2>
+<h2 id="_1_negativo_de_região">1. Negativo de região</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Nesta atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/1ª%20UNIDADE/regions/regions.cpp">regions</a>, solicitou-se a implementação de um código que, a partir de dois pontos P1 e P2 dentro de uma imagem, realizasse a inversão das cores na área do retângulo cujos vértices seriam delimitados pelos pontos fornecidos.</p>
+<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/regions/regions.cpp">regions</a>, solicitou-se a implementação de um código que, a partir de dois pontos P1 e P2 dentro de uma imagem, realizasse a inversão das cores na área do retângulo cujos vértices seriam delimitados pelos pontos fornecidos.</p>
 </div>
 <div class="paragraph">
 <p>Segue o código:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-cpp" data-lang="cpp">link:https://eldersantoss.github.io/disciplinas/pdi/1ª UNIDADE/regions/regions.cpp[]</code></pre>
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    Mat image;
+    Vec3b comp;
+    CvPoint p1, p2;
+
+    p1.x=-1;
+    p2.x=-1;
+    p1.y=-1;
+    p2.y=-1;
+
+    //Carregando imagem na matriz image:
+    image = imread(argv[1],CV_LOAD_IMAGE_COLOR);
+
+    //Verificando se a imagem foi carregada:
+    if(!image.data)
+        cerr &lt;&lt; "Erro! Imagem nao pode ser carregada, verifique tudo e tente novamente." &lt;&lt; endl;
+
+    //Criando janela para exibiçao da imagem:
+    namedWindow("janela",WINDOW_AUTOSIZE);
+
+    //Verificando se os pontos p1 e p2 estão dentro da imagem:
+    while(p1.x &gt; image.rows || p1.x &lt; 0 || p1.y &gt; image.cols || p1.y &lt; 0)
+    {
+        cout &lt;&lt; "Digite as coordenadas do primeiro pronto (x depois y):" &lt;&lt; endl;
+        cin &gt;&gt; p1.x &gt;&gt; p1.y;
+    }
+    while(p2.x &gt; image.rows || p2.x &lt; 0 || p2.y &gt; image.cols || p2.y &lt; 0)
+    {
+        cout &lt;&lt; "Digite as coordenadas do segundo pronto (x depois y):" &lt;&lt; endl;
+        cin &gt;&gt; p2.x &gt;&gt; p2.y;
+    }
+
+    //Ordenando pontos por proximidade da orgiem (0,0):
+    if(p2.x &lt; p1.x)
+    {
+        int auxx = p1.x;
+        p1.x = p2.x;
+        p2.x = auxx;
+    }
+    if(p2.y &lt; p1.y)
+    {
+        int auxy = p1.y;
+        p1.y = p2.y;
+        p2.y = auxy;
+    }
+
+    //Atribuindo os valores aos canais do Vec3b auxiliar:
+    comp[0] = 255; //B
+    comp[1] = 255; //G
+    comp[2] = 255; //R
+
+    //Invertendo as cores da imagem dentro do retângulo:
+    for(int i=p1.x; i&lt;p2.x; i++)
+    {
+        for(int j=p1.y; j&lt;p2.y; j++)
+        {
+            image.at&lt;Vec3b&gt;(i,j) = comp-image.at&lt;Vec3b&gt;(i,j);
+        }
+    }
+
+    //Exibindo e salvando imagem modificada:
+    imshow("janela", image);
+    imwrite("negativa.jpg", image);
+    waitKey();
+    return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_troca_de_regiões">2. Troca de regiões</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Download do código fonte <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/troca_regioes/trocaregioes.cpp">troca_regioes</a>.</p>
+</div>
+<div class="paragraph">
+<p>Segue o código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int, char**){
+  Mat image;
+  CvPoint pmed;
+
+  //Carregando imagem e armazenando no obejto image:
+  image = imread("biel.png",CV_LOAD_IMAGE_COLOR);
+  //Verificando carregamento:
+  if(!image.data)
+    cerr &lt;&lt; "Imagem nao carregada! Tente novamente." &lt;&lt; endl;
+
+  //Criando janela para exibição:
+  namedWindow("Regioes trocadas", WINDOW_AUTOSIZE);
+
+  //Definindo falores centrais de cada coordenada:
+  pmed.x = image.rows/2;
+  pmed.y = image.cols/2;
+
+  //Criando matriz auxiliar para armazenar quadrantes:
+  Mat temp(pmed.x, pmed.y, CV_8UC3);
+
+  //Alterando posições dos quadrantes:
+  for(int i=0; i&lt;pmed.x; i++)
+  {
+    for(int j=0; j&lt;pmed.y; j++)
+    {
+        temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i,j);
+        image.at&lt;Vec3b&gt;(i,j) = image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y);
+        image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
+        temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i+pmed.x,j);
+        image.at&lt;Vec3b&gt;(i+pmed.x,j) = image.at&lt;Vec3b&gt;(i,j+pmed.y);
+        image.at&lt;Vec3b&gt;(i,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
+    }
+  }
+
+  //Exibindo imagem:
+  imshow("Regioes trocadas", image);
+  waitKey();
+
+  return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_rotulação_de_objetos">3. Rotulação de objetos</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/new_labeling.cpp">new_labeling</a>, foi solicitado que se aprimorasse o algoritmo de contagem <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/labeling.cpp">labeling</a> para que pudesse contar até valores superiores a 255 e, além disso, identificar regiões com ou sem buracos, excluindo aquelas que tocam as bordas da imagem.</p>
+</div>
+<div class="paragraph">
+<p>Segue o código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    Mat image;
+    int width, height, nobjects=0;
+    CvPoint p;
+
+    //Carregando imagem em tons de cinza:
+    image = imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
+
+    //Valindando carregamento da imagem:
+    if(!image.data)
+    {
+        cout &lt;&lt; "imagem nao carregou corretamente\n";
+        return(-1);
+    }
+
+    //Lendo tamanho da imagem:
+    width=image.cols;
+    height=image.rows;
+
+    //Contando todos objetos de tom 255 (incluindo os que tocam as bordas e os que possuem buracos):
+    for(int i=0; i&lt;height; i++)
+    {
+        for(int j=0; j&lt;width; j++)
+        {
+            //Achou um objeto:
+            if(image.at&lt;uchar&gt;(i,j) == 255)
+            {
+                nobjects++;
+                p.x=j;
+                p.y=i;
+                floodFill(image,p,254);
+            }
+        }
+    }
+
+    //Imprimindo resultados da contagem realizada acima:
+    cout &lt;&lt; "Numero total de bolhas: " &lt;&lt; nobjects &lt;&lt; endl;
+    nobjects = 0;
+
+    //Exibindo e salavando imagem (semelhante à original):
+    imshow("Resultado", image);
+    imwrite("labelingtotal.png", image);
+    waitKey();
+
+    //Removendo objetos das bordas verticais:
+    for(int i=0; i&lt;height; i++)
+    {
+        //Borda esquerda:
+        if(image.at&lt;uchar&gt;(i,0) != 0)
+        {
+            p.x=0;
+            p.y=i;
+            floodFill(image,p,0);
+        }
+        //Borda direita:
+        if(image.at&lt;uchar&gt;(i,width-1) != 0)
+        {
+            p.x=width-1;
+            p.y=i;
+            floodFill(image,p,0);
+        }
+    }
+
+    //Removendo objetos das bordas horizontais:
+    for(int i=0; i&lt;width; i++)
+    {
+        //Borda superior:
+        if(image.at&lt;uchar&gt;(0,i) != 0)
+        {
+            p.x=i;
+            p.y=0;
+            floodFill(image,p,0);
+        }
+        //Borda inferior:
+        if(image.at&lt;uchar&gt;(height-1,i) != 0)
+        {
+            p.x=i;
+            p.y=height-1;
+            floodFill(image,p,0);
+        }
+    }
+
+    //Recontando os objetos (excluindo os que tocam as bordas):
+    for(int i=0; i&lt;height; i++)
+    {
+        for(int j=0; j&lt;width; j++)
+        {
+            //Achou um objeto:
+            if(image.at&lt;uchar&gt;(i,j) == 254)
+            {
+                nobjects++;
+                p.x=j;
+                p.y=i;
+                floodFill(image,p,253);
+            }
+        }
+    }
+
+    //Imprimindo recontagem (excluindo objetos que tocam as bordas):
+    cout &lt;&lt; "Numero de bolhas (removendo as que tocam as bordas): " &lt;&lt; nobjects &lt;&lt; endl;
+    nobjects = 0;
+
+    //Exibindo e salavando imagem (sem bolhas que tocam as bordas):
+    imshow("Resultado", image);
+    imwrite("labelingsemborda.png", image);
+    waitKey();
+
+    p.x = 0;
+    p.y = 0;
+    floodFill(image,p,100);
+
+    //Identificando e contando objetos com buracos:
+    for(int i=1; i&lt;height-1; i++)
+    {
+        for(int j=1; j&lt;width-1; j++)
+        {
+            if(image.at&lt;uchar&gt;(i,j) == 0 &amp;&amp; image.at&lt;uchar&gt;(i,j-1) == 253)
+            {
+                nobjects++;
+                p.x=j-1;
+                p.y=i;
+                floodFill(image,p,180);
+                p.x=j;
+                p.y=i;
+                floodFill(image,p,180);
+            }
+        }
+    }
+
+    //Imprimindo número de bolhas com burados:
+    cout &lt;&lt; "Numero de bolhas com buracos: " &lt;&lt; nobjects &lt;&lt; endl;
+
+    //Exibindo e salavando imagem (destacando objetos que possuiam buracos):
+    imshow("Resultado", image);
+    imwrite("labelingcomburacos.png", image);
+    waitKey();
+
+    return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_manipulação_de_histograma">4. Manipulação de histograma</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_4_1_equalização">4.1 Equalização</h3>
+<div class="paragraph">
+<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/equalize.cpp">equalize</a>, foi solicitado que, com base no código fonte <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram</a>, que calcula o histograma de uma imagem capturada em tempo real direto de um dispositivo de vídeo, se realizasse a equalização desse histograma.</p>
+</div>
+<div class="paragraph">
+<p>Segue o código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;cstring&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    Mat src, dst, histGraySrc, histGrayDst;
+    int width, height;
+    VideoCapture cap;
+    int nbins = 64;
+    float range[] = {0, 256};
+    const float *histrange = { range };
+    bool uniform = true;
+    bool acummulate = false;
+    string img_src = "Imagem original", img_dst = "Imagem equalizada";
+
+    cap.open(0);
+
+    if(!cap.isOpened())
+    {
+        cout &lt;&lt; "cameras indisponiveis";
+        return -1;
+    }
+
+    width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    cout &lt;&lt; "largura = " &lt;&lt; width &lt;&lt; endl;
+    cout &lt;&lt; "altura  = " &lt;&lt; height &lt;&lt; endl;
+
+    int histw = nbins, histh = nbins/2;
+    Mat histImgSrc(histh, histw, CV_8UC1, Scalar(0));
+    Mat histImgDst(histh, histw, CV_8UC1, Scalar(0));
+
+    while(1)
+    {
+        cap &gt;&gt; src;
+        cvtColor(src, src, CV_BGR2GRAY);
+        equalizeHist(src, dst);
+
+        calcHist(&amp;src, 1, 0, Mat(), histGraySrc, 1,
+                 &amp;nbins, &amp;histrange,
+                 uniform, acummulate);
+        calcHist(&amp;dst, 1, 0, Mat(), histGrayDst, 1,
+                 &amp;nbins, &amp;histrange,
+                 uniform, acummulate);
+
+        normalize(histGraySrc, histGraySrc, 0, histImgSrc.rows, NORM_MINMAX, -1, Mat());
+        normalize(histGrayDst, histGrayDst, 0, histImgDst.rows, NORM_MINMAX, -1, Mat());
+
+        histImgSrc.setTo(Scalar(0));
+        histImgDst.setTo(Scalar(0));
+
+        for(int i=0; i&lt;nbins; i++)
+        {
+            line(histImgSrc,
+                 Point(i, histh),
+                 Point(i, histh-cvRound(histGraySrc.at&lt;float&gt;(i))),
+                 Scalar(255), 1, 8, 0);
+            line(histImgDst,
+                 Point(i, histh),
+                 Point(i, histh-cvRound(histGrayDst.at&lt;float&gt;(i))),
+                 Scalar(255), 1, 8, 0);
+        }
+        histImgSrc.copyTo(src(Rect(0, 0,nbins, histh)));
+        histImgDst.copyTo(dst(Rect(0, 0,nbins, histh)));
+
+        namedWindow(img_src);
+        namedWindow(img_dst);
+        imshow(img_src, src);
+        imshow(img_dst, dst);
+
+        if(waitKey(30) &gt;= 0) break;
+    }
+    return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_2_detector_de_movimentos">4.2 Detector de movimentos</h3>
+<div class="paragraph">
+<p>Já na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/motiondetector.cpp">motiondetector</a>, solicitou-se que, ainda baseando-se no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram</a>, a partir da comparação do histograma atual com o último histograma de quadros capturados continuamente, fosse realizada a decteção de movimento na imagem com base na diferença entre os dois histogramas.</p>
+</div>
+<div class="paragraph">
+<p>Segue o código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    Mat src, histR, histROld;
+    vector&lt;Mat&gt; planes;
+    int width, height;
+    VideoCapture cap;
+    int nbins = 64, cont=0; //Definindo quantidade de faixas (bins) do histograma.
+    float range[] = {0, 256}; //Definindo faixa de valores assumidos pelo histograma.
+    const float *histrange = { range };
+    bool uniform = true;
+    bool acummulate = false;
+
+    //Abrindo dispositivo de vídeo (câmera):
+    cap.open(0);
+    if(!cap.isOpened())
+    {
+        cout &lt;&lt; "cameras indisponiveis";
+        return -1;
+    }
+
+    //Capturando largura e altura do vídeo:
+    width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    cout &lt;&lt; "largura = " &lt;&lt; width &lt;&lt; endl;
+    cout &lt;&lt; "altura  = " &lt;&lt; height &lt;&lt; endl;
+
+    //Definindo largura e altura da imagem que irá exibir o histograma:
+    int histw = nbins, histh = nbins/2;
+    Mat histImgR(histh, histw, CV_8UC3, Scalar(0,0,0));
+
+    //Capturando imagem inicial e calculando seu histograma:
+    cap &gt;&gt; src;
+    split (src, planes);
+    calcHist(&amp;planes[0], 1, 0, Mat(), histROld, 1,
+            &amp;nbins, &amp;histrange,
+            uniform, acummulate);
+    normalize(histROld, histROld, 0, histImgR.rows, NORM_MINMAX, -1, Mat());
+
+    //Capturando imagens continuamente, calculando e verificando variação de histograma entre dois quadros sucessivos:
+    while(1)
+    {
+        cap &gt;&gt; src;
+        split (src, planes);
+        calcHist(&amp;planes[0], 1, 0, Mat(), histR, 1,
+                 &amp;nbins, &amp;histrange,
+                 uniform, acummulate);
+        normalize(histR, histR, 0, histImgR.rows, NORM_MINMAX, -1, Mat());
+
+        //Contando quantas das faixas de valores do histograma variaram mais de 70% de um quadro para o seu sucessor:
+        for(int i=0; i&lt;nbins; i++)
+        {
+            if(abs(cvRound(histR.at&lt;float&gt;(i))-cvRound(histROld.at&lt;float&gt;(i))) &gt; 0.7*cvRound(histR.at&lt;float&gt;(i))) cont++;
+        }
+        //Verificando se a quantidade faixas que variaram é maior que 50% do número total de faixas:
+        if(cont &gt;= 0.5*nbins)
+        {
+            cout &lt;&lt; "\aMovimento detectado!!!" &lt;&lt; endl;
+            cont = 0;
+        }
+        //Armazenando histograma antigo para comparar com o próximo:
+        histR.copyTo(histROld);
+
+        //Reiniciando a cor da matriz de exibição do histograma:
+        histImgR.setTo(Scalar(0));
+
+        //Desenhando linhas do histograma na matriz:
+        for(int i=0; i&lt;nbins; i++)
+        {
+            line(histImgR,
+                 Point(i, histh),
+                 Point(i, histh-cvRound(histR.at&lt;float&gt;(i))),
+                 Scalar(0, 0, 255), 1, 8, 0);
+        }
+        //Copiando matriz do histograma para imagem que será exibida em tempo real:
+        histImgR.copyTo(src(Rect(0, 0,nbins, histh)));
+
+        //Exibindo imagem da câmera com o histograma superposto no canto superior esquerdo:
+        imshow("Detector de movimentos", src);
+        if(waitKey(30) &gt;= 0) break;
+    }
+    return 0;
+}</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -466,7 +958,7 @@ Para compilar e executar os códigos aqui presentes, utilizar este <a href="http
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-10 10:51:33 -03
+Last updated 2018-04-10 13:01:24 -03
 </div>
 </div>
 </body>
