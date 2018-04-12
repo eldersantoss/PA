@@ -433,17 +433,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Olá! Esta página é dedicada à postagem de atividades desenvolvidas envolvendo conceitos estudados na disciplina de Pocessamento Digital de Imagens, ministrada pelo professor Agostinho Brito Júnior, na UFRN.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Para compilar e executar os códigos aqui presentes, utilizar este <a href="https://eldersantoss.github.io/Makefile">Makefile</a>.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>Para melhor compreensão dos exercícios desenvolvidos e maiores informações de como compilar e executar os códigos que aqui serão mostrados, sugere-se a leitura dos enunciados e conteúdos abordados nas atividades, disponíveis <a href="https://agostinhobritojr.github.io/tutoriais/pdi/">aqui</a>.</p>
 </div>
 </div>
 </div>
@@ -451,12 +442,13 @@ Para compilar e executar os códigos aqui presentes, utilizar este <a href="http
 <h2 id="_1_negativo_de_região">1. Negativo de região</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/regions/regions.cpp">regions</a>, solicitou-se a implementação de um código que, a partir de dois pontos P1 e P2 dentro de uma imagem, realizasse a inversão das cores na área do retângulo cujos vértices seriam delimitados pelos pontos fornecidos.</p>
+<p>Na atividade, solicitou-se uma implementação com base no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/pixels/pixels.cpp">pixels.cpp</a> que, a partir de dois pontos P1 e P2 dentro de uma imagem, realizasse a inversão das cores na área do retângulo cujos vértices seriam delimitados pelos pontos fornecidos, causando um efeito de imagem negativa.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/regions/regions.cpp">regions.cpp</a>.</p>
 </div>
 <div class="listingblock">
+<div class="title">regions.cpp</div>
 <div class="content">
 <pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
 #include &lt;opencv2/opencv.hpp&gt;
@@ -533,18 +525,25 @@ int main(int argc, char** argv)
 }</code></pre>
 </div>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/negativa.jpg" alt="negativa">
+</div>
+<div class="title">Figure 1. Imagem com região negativada</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_2_troca_de_regiões">2. Troca de regiões</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Download do código fonte <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/troca_regioes/trocaregioes.cpp">troca_regioes</a>.</p>
+<p>Neste exercícios, foi pedido que com base no mesmo programa <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/pixels/pixels.cpp">pixels</a>, fosse desenvolvido um programa capaz de trocar de posição os quadrantes de uma determinada imagem.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/troca_regioes/trocaregioes.cpp">troca_regioes.cpp</a>.</p>
 </div>
 <div class="listingblock">
+<div class="title">trocaregioes.cpp</div>
 <div class="content">
 <pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
 #include &lt;opencv2/opencv.hpp&gt;
@@ -552,47 +551,54 @@ int main(int argc, char** argv)
 using namespace cv;
 using namespace std;
 
-int main(int, char**){
-  Mat image;
-  CvPoint pmed;
+int main(int, char**)
+{
+    Mat image;
+    CvPoint pmed;
 
-  //Carregando imagem e armazenando no obejto image:
-  image = imread("biel.png",CV_LOAD_IMAGE_COLOR);
-  //Verificando carregamento:
-  if(!image.data)
-    cerr &lt;&lt; "Imagem nao carregada! Tente novamente." &lt;&lt; endl;
+    //Carregando imagem e armazenando no obejto image:
+    image = imread("biel.png",CV_LOAD_IMAGE_COLOR);
+    //Verificando carregamento:
+    if(!image.data)
+        cerr &lt;&lt; "Imagem nao carregada! Tente novamente." &lt;&lt; endl;
 
-  //Criando janela para exibição:
-  namedWindow("Regioes trocadas", WINDOW_AUTOSIZE);
+    //Criando janela para exibição:
+    namedWindow("Regioes trocadas", WINDOW_AUTOSIZE);
 
-  //Definindo falores centrais de cada coordenada:
-  pmed.x = image.rows/2;
-  pmed.y = image.cols/2;
+    //Definindo falores centrais de cada coordenada:
+    pmed.x = image.rows/2;
+    pmed.y = image.cols/2;
 
-  //Criando matriz auxiliar para armazenar quadrantes:
-  Mat temp(pmed.x, pmed.y, CV_8UC3);
+    //Criando matriz auxiliar para armazenar quadrantes:
+    Mat temp(pmed.x, pmed.y, CV_8UC3);
 
-  //Alterando posições dos quadrantes:
-  for(int i=0; i&lt;pmed.x; i++)
-  {
-    for(int j=0; j&lt;pmed.y; j++)
+    //Alterando posições dos quadrantes:
+    for(int i=0; i&lt;pmed.x; i++)
     {
-        temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i,j);
-        image.at&lt;Vec3b&gt;(i,j) = image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y);
-        image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
-        temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i+pmed.x,j);
-        image.at&lt;Vec3b&gt;(i+pmed.x,j) = image.at&lt;Vec3b&gt;(i,j+pmed.y);
-        image.at&lt;Vec3b&gt;(i,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
+        for(int j=0; j&lt;pmed.y; j++)
+        {
+            temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i,j);
+            image.at&lt;Vec3b&gt;(i,j) = image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y);
+            image.at&lt;Vec3b&gt;(i+pmed.x,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
+            temp.at&lt;Vec3b&gt;(i, j) = image.at&lt;Vec3b&gt;(i+pmed.x,j);
+            image.at&lt;Vec3b&gt;(i+pmed.x,j) = image.at&lt;Vec3b&gt;(i,j+pmed.y);
+            image.at&lt;Vec3b&gt;(i,j+pmed.y) = temp.at&lt;Vec3b&gt;(i, j);
+        }
     }
-  }
 
-  //Exibindo imagem:
-  imshow("Regioes trocadas", image);
-  waitKey();
-
-  return 0;
+    //Exibindo imagem:
+    imshow("Regioes trocadas", image);
+    imwrite("regioes_trocadas.jpg", image);
+    waitKey();
+    return 0;
 }</code></pre>
 </div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/regioes_trocadas.jpg" alt="regioes trocadas">
+</div>
+<div class="title">Figure 2. Imagem com quadrantes trocados</div>
 </div>
 </div>
 </div>
@@ -600,12 +606,13 @@ int main(int, char**){
 <h2 id="_3_rotulação_de_objetos">3. Rotulação de objetos</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/new_labeling.cpp">new_labeling</a>, foi solicitado que se aprimorasse o algoritmo de contagem <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/labeling.cpp">labeling</a> para que pudesse contar até valores superiores a 255 e, além disso, identificar regiões com ou sem buracos, excluindo aquelas que tocam as bordas da imagem.</p>
+<p>Nesta atividade, foi solicitado que se aprimorasse o algoritmo de contagem <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/labeling.cpp">labeling.cpp</a> para que pudesse atingir valores superiores a 255 e, além disso, identificar regiões com ou sem buracos, excluindo aquelas que tocam as bordas da imagem. O código seguinte sintetiza o que foi solicitado nos dois passos do <a href="https://agostinhobritojr.github.io/tutoriais/pdi/#_exerc%C3%ADcios_2">Exercícios 3.2</a>.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/new_labeling.cpp">new_labeling.cpp</a>.</p>
 </div>
 <div class="listingblock">
+<div class="title">new_labeling.cpp</div>
 <div class="content">
 <pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
 #include &lt;opencv2/opencv.hpp&gt;
@@ -755,18 +762,42 @@ int main(int argc, char** argv)
 }</code></pre>
 </div>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/bolhas.png" alt="bolhas">
+</div>
+<div class="title">Figure 3. Imagem original utilizada na contagem</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/labelingsemborda.png" alt="labelingsemborda">
+</div>
+<div class="title">Figure 4. Imagem removendo os objetos que tocam as bordas</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/labelingcomburacos.png" alt="labelingcomburacos">
+</div>
+<div class="title">Figure 5. Imagem destacando os objetos que possuem 'buracos'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/new_labeling_resultados.png" alt="new labeling resultados">
+</div>
+<div class="title">Figure 6. Resultados da contagem</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_4_manipulação_de_histograma">4. Manipulação de histograma</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_4_1_equalização">4.1 Equalização</h3>
+<h3 id="_4_1_equalização">4.1. Equalização</h3>
 <div class="paragraph">
-<p>Na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/equalize.cpp">equalize</a>, foi solicitado que, com base no código fonte <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram</a>, que calcula o histograma de uma imagem capturada em tempo real direto de um dispositivo de vídeo, se realizasse a equalização desse histograma.</p>
+<p>Neste exercícios, foi solicitado que, com base no programa <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram.cpp</a>, que calcula o histograma de uma imagem capturada em tempo real direto de um dispositivo de vídeo, se realizasse a equalização desse histograma.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/equalize.cpp">equalize.cpp</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -851,14 +882,26 @@ int main(int argc, char** argv)
 }</code></pre>
 </div>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/hist_origi.png" alt="hist origi">
+</div>
+<div class="title">Figure 7. Imagem sem equalização</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/hist_eqlz.png" alt="hist eqlz">
+</div>
+<div class="title">Figure 8. Imagem equalizada</div>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_4_2_detector_de_movimentos">4.2 Detector de movimentos</h3>
+<h3 id="_4_2_detector_de_movimentos">4.2. Detector de movimentos</h3>
 <div class="paragraph">
-<p>Já na atividade <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/motiondetector.cpp">motiondetector</a>, solicitou-se que, ainda baseando-se no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram</a>, a partir da comparação do histograma atual com o último histograma de quadros capturados continuamente, fosse realizada a decteção de movimento na imagem com base na diferença entre os dois histogramas.</p>
+<p>Prosseguindo nos exercícios relacionados à manipulação de histograma, solicitou-se que, ainda baseando-se no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp">histogram.cpp</a>, a partir da comparação do histograma atual com o último histograma de quadros capturados continuamente, fosse realizada a decteção de movimento na imagem com base na diferença entre os dois histogramas.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/motiondetector.cpp">motiondetector.cpp</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -955,10 +998,207 @@ int main(int argc, char** argv)
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_5_aplicação_de_filtros_espaciais">5. Aplicação de filtros espaciais</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nesta atividade, foi solicitado que se fizesse uma alteração no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/filtro_espacial/filtroespacial.cpp">filtroespacial.cpp</a>, de modo à adicionar mais uma opção de filtragem, o laplaciano do gaussiano. Isto é, realizar a aplicação de ambos os filtros simultanemante na mesma imagem.</p>
+</div>
+<div class="paragraph">
+<p>Segue o código:</p>
+</div>
+<div class="listingblock">
+<div class="title">laplgauss.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+void printmask(Mat &amp;m)
+{
+    for(int i=0; i&lt;m.size().height; i++)
+    {
+        for(int j=0; j&lt;m.size().width; j++)
+        {
+            cout &lt;&lt; m.at&lt;float&gt;(i,j) &lt;&lt; ",";
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+void menu()
+{
+    cout &lt;&lt; "\npressione a tecla para ativar o filtro: \n"
+         "a - calcular modulo\n"
+         "m - media\n"
+         "g - gauss\n"
+         "v - vertical\n"
+         "h - horizontal\n"
+         "l - laplaciano\n"
+         "d - laplaciano do gaussiano\n"
+         "esc - sair\n";
+}
+
+int main(int argvc, char** argv)
+{
+    VideoCapture video;
+    float media[] = {1,1,1,
+                     1,1,1,
+                     1,1,1
+                    };
+    float gauss[] = {1,2,1,
+                     2,4,2,
+                     1,2,1
+                    };
+    float horizontal[]= {-1,0,1,
+                         -2,0,2,
+                         -1,0,1
+                        };
+    float vertical[]= {-1,-2,-1,
+                       0,0,0,
+                       1,2,1
+                      };
+    float laplacian[]= {0,-1,0,
+                        -1,4,-1,
+                        0,-1,0
+                       };
+
+    Mat cap, frame, frame32f, frameFiltered, frameFilteredLG;
+    Mat mask(3,3,CV_32F), mask1;
+    Mat result, result1;
+    double width, height, min, max;
+    int absolut, laplgauss;
+    char key;
+
+    video.open(0);
+    if(!video.isOpened())
+        return -1;
+    width=video.get(CV_CAP_PROP_FRAME_WIDTH);
+    height=video.get(CV_CAP_PROP_FRAME_HEIGHT);
+    cout &lt;&lt; "largura=" &lt;&lt; width &lt;&lt; "\n";;
+    cout &lt;&lt; "altura =" &lt;&lt; height&lt;&lt; "\n";;
+
+    namedWindow("filtroespacial",1);
+
+    mask = Mat(3, 3, CV_32F, media);
+    scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+    swap(mask, mask1);
+    absolut=1; // calcs abs of the image
+    laplgauss=0; //ativa filtro laplaciano do gaussiano
+
+    menu();
+    for(;;)
+    {
+        video &gt;&gt; cap;
+        cvtColor(cap, frame, CV_BGR2GRAY);
+        flip(frame, frame, 1);
+        imshow("original", frame);
+        frame.convertTo(frame32f, CV_32F);
+        if(laplgauss)
+        {
+            mask = Mat(3, 3, CV_32F, gauss);
+            filter2D(frame32f, frameFilteredLG, frame32f.depth(), mask, Point(1,1), 0);
+            mask = Mat(3, 3, CV_32F, laplacian);
+            filter2D(frameFilteredLG, frameFiltered, frameFilteredLG.depth(), mask, Point(1,1), 0);
+        }
+        else filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1,1), 0);
+        if(absolut)
+        {
+            frameFiltered=abs(frameFiltered);
+        }
+        frameFiltered.convertTo(result, CV_8U);
+        imshow("filtroespacial", result);
+        key = (char) waitKey(10);
+        if( key == 27 ) break; // esc pressed!
+        switch(key)
+        {
+        case 'a':
+            menu();
+            absolut=!absolut;
+            break;
+        case 'm':
+            menu();
+            if(laplgauss) laplgauss=!laplgauss;
+            mask = Mat(3, 3, CV_32F, media);
+            scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+            mask = mask1;
+            cout &lt;&lt; endl;
+            printmask(mask);
+            break;
+        case 'g':
+            menu();
+            if(laplgauss) laplgauss=!laplgauss;
+            mask = Mat(3, 3, CV_32F, gauss);
+            scaleAdd(mask, 1/16.0, Mat::zeros(3,3,CV_32F), mask1);
+            mask = mask1;
+            cout &lt;&lt; endl;
+            printmask(mask);
+            break;
+        case 'h':
+            menu();
+            if(laplgauss) laplgauss=!laplgauss;
+            mask = Mat(3, 3, CV_32F, horizontal);
+            cout &lt;&lt; endl;
+            printmask(mask);
+            break;
+        case 'v':
+            menu();
+            if(laplgauss) laplgauss=!laplgauss;
+            mask = Mat(3, 3, CV_32F, vertical);
+            cout &lt;&lt; endl;
+            printmask(mask);
+            break;
+        case 'l':
+            menu();
+            if(laplgauss) laplgauss=!laplgauss;
+            mask = Mat(3, 3, CV_32F, laplacian);
+            cout &lt;&lt; endl;
+            printmask(mask);
+            break;
+        case 'd':
+            menu();
+            laplgauss=1;
+            mask = Mat(3, 3, CV_32F, gauss);
+            cout &lt;&lt; endl;
+            printmask(mask);
+            cout &lt;&lt; endl;
+            mask = Mat(3, 3, CV_32F, laplacian);
+            printmask(mask);
+            break;
+        default:
+            break;
+        }
+    }
+    return 0;
+}</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/filtro_orig.png" alt="filtro orig">
+</div>
+<div class="title">Figure 9. Imagem original</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/filtro_laplaciano.png" alt="filtro laplaciano">
+</div>
+<div class="title">Figure 10. Imagem apenas com filtro laplaciano</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/filtro_laplgauss.png" alt="filtro laplgauss">
+</div>
+<div class="title">Figure 11. Imagem com filtro laplaciano do gaussiano</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-10 13:01:24 -03
+Last updated 2018-04-11 22:35:47 -03
 </div>
 </div>
 </body>

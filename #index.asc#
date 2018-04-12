@@ -1,0 +1,70 @@
+= Processamento Digital de Imagens - Atividades
+Elder Santos <elder_rn@hotmail.com>
+
+Olá! Esta página é dedicada à postagem de atividades desenvolvidas envolvendo conceitos estudados na disciplina Pocessamento Digital de Imagens, ministrada pelo professor Agostinho Brito Júnior, na UFRN.
+
+Para melhor compreensão dos exercícios aqui desenvolvidos, sugere-se o acompanhamento dos enunciados e conteúdos abordados nos exercícios, disponíveis link:https://
+
+NOTE: Para compilar e executar os códigos aqui presentes, utilizar este link:https://eldersantoss.github.io/Makefile[Makefile].
+
+
+== 1. Negativo de região
+
+Na atividade link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/regions/regions.cpp[regions], solicitou-se a implementação de um código que, a partir de dois pontos P1 e P2 dentro de uma imagem, realizasse a inversão das cores na área do retângulo cujos vértices seriam delimitados pelos pontos fornecidos.
+
+Segue o código:
+
+[source, cpp]
+----
+include::disciplinas/pdi/unidade1/regions/regions.cpp[]
+----
+
+
+== 2. Troca de regiões
+
+Download do código fonte link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/troca_regioes/trocaregioes.cpp[troca_regioes].
+
+Segue o código:
+
+[source, cpp]
+----
+include::disciplinas/pdi/unidade1/troca_regioes/trocaregioes.cpp[]
+----
+
+
+== 3. Rotulação de objetos
+
+Na atividade link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/new_labeling.cpp[new_labeling], foi solicitado que se aprimorasse o algoritmo de contagem link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/labeling/labeling.cpp[labeling] para que pudesse contar até valores superiores a 255 e, além disso, identificar regiões com ou sem buracos, excluindo aquelas que tocam as bordas da imagem. O código seguinte sintetiza o que foi solicitado nos dois passos do exercício.
+
+Segue o código:
+
+[source, cpp]
+----
+include::disciplinas/pdi/unidade1/labeling/new_labeling.cpp[]
+----
+
+
+== 4. Manipulação de histograma
+
+=== 4.1 Equalização
+
+Na atividade link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/equalize.cpp[equalize], foi solicitado que, com base no código fonte link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp[histogram], que calcula o histograma de uma imagem capturada em tempo real direto de um dispositivo de vídeo, se realizasse a equalização desse histograma.
+
+Segue o código:
+
+[source, cpp]
+----
+include::disciplinas/pdi/unidade1/histogram/equalize.cpp[]
+----
+
+=== 4.2 Detector de movimentos
+
+Já na atividade link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/motiondetector.cpp[motiondetector], solicitou-se que, ainda baseando-se no código link:https://eldersantoss.github.io/disciplinas/pdi/unidade1/histogram/histogram.cpp[histogram], a partir da comparação do histograma atual com o último histograma de quadros capturados continuamente, fosse realizada a decteção de movimento na imagem com base na diferença entre os dois histogramas.
+
+Segue o código:
+
+[source, cpp]
+----
+include::disciplinas/pdi/unidade1/histogram/motiondetector.cpp[]
+----
+
