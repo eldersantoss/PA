@@ -5,7 +5,7 @@
 using namespace cv;
 using namespace std;
 
-Mat org, borrada, resultado, teste;
+Mat org, borrada, resultado;
 
 double alpha, gama;
 int delta_slider=50, delta_slider_max = 100;
