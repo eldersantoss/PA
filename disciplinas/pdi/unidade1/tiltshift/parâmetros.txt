@@ -1,9 +1,0 @@
-parametros importantes:
-
-l1 = limite superior de borramento
-
-l2 = limite inferior de borramento
-
-(l2-l1) = altura da região central focalizada
-
-d = força de decaimento da região borrada (quanto menor, mais abrupta a transição)

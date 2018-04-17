@@ -1,9 +1,9 @@
-primeiro par.: delta_l referente a largura da regiao original na imagem, uma barrinha para altera-lo, nao pode ser maior que a qtd
+primeiro par.: "delta_l" referente a largura da regiao original na imagem, uma barrinha para altera-lo, nao pode ser maior que a qtd
 de linhas da imagem;
 
-segundo par.: pos referente a posicao da regiao nitida na imagem, uma barrinha para altera-lo, nao pode ser.....
+segundo par.: "pos" referente a posicao da regiao nitida na imagem, uma barrinha para altera-lo, consite de um numero inteiro que sera somado ao "delta_l/2" em cada uma das parcelas da tanh, para "pos" > 0, deslocamento p direita, "pos" < 0, deslocamento p esquerda.
 
-terceiro par.: aten referente a atenuacao na transicao entre a imagem borrada e a imagem original
+terceiro par.: "aten" referente a atenuacao na transicao entre a imagem borrada e a imagem original, quanto maior, maior tb será a atenuação
 
 como a funcao deve ficar: alpa(i) = (0.5)*(tanh((i-delta_l/2)/aten)-tanh((i-delta_l/2)/aten))
 
