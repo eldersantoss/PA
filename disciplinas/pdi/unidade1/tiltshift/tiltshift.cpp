@@ -31,6 +31,7 @@ void on_trackbar_altura(int, void*)
         }
     }
     imshow("Tiltshild", resultado);
+    imwrite("tiltshift_resultado.png", resultado);
 }
 
 //Ação da segunda barra

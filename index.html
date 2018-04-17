@@ -1197,7 +1197,7 @@ int main(int argvc, char** argv)
 </div>
 </div>
 <div class="sect1">
-<h2 id="_6_1_tiltshif_em_imagens">6.1. Tiltshif em imagens</h2>
+<h2 id="_6_1_tiltshift_em_imagens">6.1. Tiltshift em imagens</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Na presente atividade, solicitou-se que se implementasse um programa, com base no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/addweighted.cpp">addweighted.cpp</a>, capaz de simular o famoso efeito tiltshift em uma imagem.</p>
@@ -1241,6 +1241,7 @@ void on_trackbar_altura(int, void*)
         }
     }
     imshow("Tiltshild", resultado);
+    imwrite("tiltshift_resultado.png", resultado);
 }
 
 //Ação da segunda barra
@@ -1309,16 +1310,22 @@ int main(int argc, char** argv)
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="imagens/tiltshift.png" alt="tiltshift">
+<img src="imagens/campnou.jpg" alt="campnou">
 </div>
-<div class="title">Figure 12. Efeito tiltshift</div>
+<div class="title">Figure 12. Imagem original</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/tiltshift_resultado.png" alt="tiltshift resultado">
+</div>
+<div class="title">Figure 13. Imagem com tiltshift</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-16 23:49:41 -03
+Last updated 2018-04-17 09:36:57 -03
 </div>
 </div>
 </body>
