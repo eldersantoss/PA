@@ -1006,7 +1006,7 @@ int main(int argc, char** argv)
 <p>Nesta atividade, foi solicitado que se fizesse uma alteração no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/filtro_espacial/filtroespacial.cpp">filtroespacial.cpp</a>, de modo à adicionar mais uma opção de filtragem, o laplaciano do gaussiano. Isto é, realizar a aplicação de ambos os filtros simultanemante na mesma imagem.</p>
 </div>
 <div class="paragraph">
-<p>Segue o código:</p>
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/filtro_espacial/laplgauss.cpp">laplgauss.cpp</a>.</p>
 </div>
 <div class="listingblock">
 <div class="title">laplgauss.cpp</div>
@@ -1196,10 +1196,129 @@ int main(int argvc, char** argv)
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_6_1_tiltshif_em_imagens">6.1. Tiltshif em imagens</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Na presente atividade, solicitou-se que se implementasse um programa, com base no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/addweighted.cpp">addweighted.cpp</a>, capaz de simular o famoso efeito tiltshift em uma imagem.</p>
+</div>
+<div class="paragraph">
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/tiltshift.cpp">tiltshift.cpp</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">tiltshift.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;cmath&gt;
+
+using namespace cv;
+using namespace std;
+
+Mat org, borrada, resultado, teste;
+
+double alpha, gama;
+int delta_slider=50, delta_slider_max = 100;
+int pos_slider = 50, pos_slider_max = 100;
+int aten_slider=1, aten_slider_max = 100;
+char TrackbarName[50];
+
+
+//Ação da primeira barra
+void on_trackbar_altura(int, void*)
+{
+    int l = (delta_slider*org.rows)/(2*delta_slider_max);
+    int centro = org.rows/2;
+
+    //Preenchendo mat resultado linha por linha utilizando a função addWeighted
+    for(int i=0; i&lt;org.cols; i++)
+    {
+        for(int j=0; j&lt;org.rows; j++)
+        {
+            alpha = 0.5*(tanh((j-centro+l+pos_slider)/(2*(float)aten_slider))-tanh((j-centro-l+pos_slider)/(2*(float)aten_slider)));
+            gama = 1.0 - alpha;
+            addWeighted(org.row(j), alpha, borrada.row(j), gama, 0.0, resultado.row(j));
+        }
+    }
+    imshow("Tiltshild", resultado);
+}
+
+//Ação da segunda barra
+void on_trackbar_pos(int, void*)
+{
+    if(pos_slider == 50)
+    {
+        pos_slider = 0;
+    }
+    else if(pos_slider &lt; 50)
+    {
+        pos_slider = 50 - pos_slider;
+        pos_slider = (pos_slider*org.rows)/pos_slider_max;
+    }
+    else
+    {
+        pos_slider = (pos_slider - 50)*(-1);
+        pos_slider = (pos_slider*org.rows)/pos_slider_max;
+    }
+    on_trackbar_altura(delta_slider, 0);
+}
+
+//Ação da terceira barra
+void on_trackbar_aten(int, void*)
+{
+    aten_slider += 1;
+    on_trackbar_altura(delta_slider, 0);
+}
+
+int main(int argc, char** argv)
+{
+    //Abrindo imagem passada por parâmetro
+    org = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+    org.copyTo(borrada);
+    org.copyTo(resultado);
+    teste = Mat(org.rows, org.cols, org.depth());
+
+    namedWindow("Tiltshild", WINDOW_AUTOSIZE);
+
+    //Criando versão borrada da imagem original
+    float media[] = {1,1,1,1,1,1,1,1,1};
+    Mat mask(3, 3, CV_32F, media);
+    scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask);
+    for(int i=0; i&lt;20; i++) filter2D(borrada, borrada, org.depth(), mask, Point(1,1), 0);
+
+    //Criando primeira TrackBar
+    sprintf(TrackbarName, "Altura: ");
+    createTrackbar(TrackbarName, "Tiltshild", &amp;delta_slider, delta_slider_max, on_trackbar_altura);
+    on_trackbar_altura(delta_slider, 0);
+
+    //Criando segunda TrackBar
+    sprintf(TrackbarName, "Posicao: ");
+    createTrackbar(TrackbarName, "Tiltshild", &amp;pos_slider, pos_slider_max, on_trackbar_pos);
+    on_trackbar_pos(pos_slider, 0);
+
+    //Criando terceira TrackBar
+    sprintf(TrackbarName, "Atenuacao: ");
+    createTrackbar(TrackbarName, "Tiltshild", &amp;aten_slider, aten_slider_max, on_trackbar_aten);
+    on_trackbar_aten(aten_slider, 0);
+
+    waitKey(0);
+
+	return 0;
+}</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="imagens/tiltshift.png" alt="tiltshift">
+</div>
+<div class="title">Figure 12. Efeito tiltshift</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-11 22:40:47 -03
+Last updated 2018-04-16 23:49:41 -03
 </div>
 </div>
 </body>
