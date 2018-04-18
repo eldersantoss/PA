@@ -1341,12 +1341,10 @@ int main(int argc, char** argv)
 <div class="title">tiltshiftvideo.cpp</div>
 <div class="content">
 <pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
 #include &lt;string&gt;
 #include &lt;cmath&gt;
 
-#include &lt;opencv2/opencv.hpp&gt;
-//#include &lt;opencv2/core/core.hpp&gt;
-//#include &lt;opencv2/highgui/highgui.hpp&gt;
 
 using namespace cv;
 using namespace std;
@@ -1413,7 +1411,7 @@ int main(int argc, char** argv)
         {
             for(int j=0; j&lt;org_frame.rows; j++)
             {
-                alpha = 0.5*(tanh((j-150)/10)-tanh((j-350)/10));
+                alpha = 0.5*(tanh((j-centro/2)/10)-tanh((j-(3*centro)/2)/10));
                 gama = 1.0 - alpha;
                 addWeighted(org_frame.row(j), alpha, brr_frame.row(j), gama, 0.0, comb_frame.row(j));
             }
@@ -1432,7 +1430,7 @@ int main(int argc, char** argv)
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-18 14:11:01 -03
+Last updated 2018-04-18 14:12:26 -03
 </div>
 </div>
 </body>
