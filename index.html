@@ -1197,8 +1197,10 @@ int main(int argvc, char** argv)
 </div>
 </div>
 <div class="sect1">
-<h2 id="_6_1_tiltshift_em_imagens">6.1. Tiltshift em imagens</h2>
+<h2 id="_6_filtragem_no_domínio_espacial_efeito_tiltshift_em_imagens_e_vídeos">6. Filtragem no domínio espacial: efeito Tiltshift em imagens e vídeos</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_6_1_tiltshift_em_imagens">6.1. Tiltshift em imagens</h3>
 <div class="paragraph">
 <p>Na presente atividade, solicitou-se que se implementasse um programa, com base no código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/addweighted.cpp">addweighted.cpp</a>, capaz de simular o famoso efeito tiltshift em uma imagem.</p>
 </div>
@@ -1275,9 +1277,15 @@ int main(int argc, char** argv)
 {
     //Abrindo imagem passada por parâmetro
     org = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+
+    if(!org.data)
+    {
+        cerr &lt;&lt; "Imagem nao carregou corretamente!!!" &lt;&lt; endl;
+        return (-1);
+    }
+
     org.copyTo(borrada);
     org.copyTo(resultado);
-    teste = Mat(org.rows, org.cols, org.depth());
 
     namedWindow("Tiltshild", WINDOW_AUTOSIZE);
 
@@ -1321,11 +1329,110 @@ int main(int argc, char** argv)
 <div class="title">Figure 13. Imagem com tiltshift</div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_6_2_tiltshift_em_vídeos">6.2. Tiltshift em vídeos</h3>
+<div class="paragraph">
+<p>Dando continuidade à exploração dos filtros espaciais, com base no mesmo <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/addweighted.cpp">addweighted.cpp</a>, solicitou-se que fosse implementado um programa capaz de aplicar o efeito Tiltshift em conjunto com Stop Motion em um vídeo e, em seguida, salvasse o resultado em outro arquivo de vídeo.</p>
+</div>
+<div class="paragraph">
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade1/tiltshift/tiltshiftvideo.cpp">tiltshiftvideo.cpp</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">tiltshiftvideo.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+
+#include &lt;opencv2/opencv.hpp&gt;
+//#include &lt;opencv2/core/core.hpp&gt;
+//#include &lt;opencv2/highgui/highgui.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+
+int main(int argc, char** argv)
+{
+    Mat org_frame, dsct_frame, brr_frame, comb_frame;
+    VideoCapture cap;
+    VideoWriter rnd;
+    double alpha, gama;
+    int width, height, centro, FPS, codec;
+
+
+    //Abrindo video
+    cap.open(argv[1]);
+    if(!cap.isOpened())
+    {
+        cerr &lt;&lt; "Video nao carregou corretamente!!!" &lt;&lt; endl;
+        return (-1);
+    }
+
+    // Atribuindo valores aos parametros necessarios para abrir o canal de salvamento do video
+    const string video_name = "video-tiltshift.avi";
+    codec = CV_FOURCC('X','V','I','D');
+    FPS = cap.get(CV_CAP_PROP_FPS);
+    width = (int) cap.get(CV_CAP_PROP_FRAME_WIDTH); height = (int) cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    Size S = Size(width, height);
+
+    centro = height/2;
+
+    // Abrindo canal de salvamento de video
+    rnd.open(video_name, codec, FPS, S);
+    if(!rnd.isOpened())
+    {
+        cerr &lt;&lt; "Erro na criacao do video!!!" &lt;&lt; endl;
+        return (-1);
+    }
+
+    // Lendo quadros do video e aplicando efeitos tiltshift + stop motion
+    for(;;)
+    {
+        // Capturando frames da imagem
+        cap &gt;&gt; org_frame;
+
+        // Descartando 3 frames para cada captura (stop motion)
+        for(int i=0; i&lt;3; i++) cap &gt;&gt; dsct_frame;
+
+        // Condiço de parada do laço
+        if(org_frame.empty()) break;
+
+        // Preparando imagem borrada
+        org_frame.copyTo(brr_frame);
+        float media[] = {1,1,1,1,1,1,1,1,1};
+        Mat mask(3, 3, CV_32F, media);
+        scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask);
+        for(int i=0; i&lt;20; i++) filter2D(brr_frame, brr_frame, org_frame.depth(), mask, Point(1,1), 0);
+
+        // Pre-alocando matriz que recebera o frame final
+        comb_frame = Mat::zeros(S, org_frame.type());
+
+        // Aplicando efeito tiltshift no quadro
+        for(int i=0; i&lt;org_frame.cols; i++)
+        {
+            for(int j=0; j&lt;org_frame.rows; j++)
+            {
+                alpha = 0.5*(tanh((j-150)/10)-tanh((j-350)/10));
+                gama = 1.0 - alpha;
+                addWeighted(org_frame.row(j), alpha, brr_frame.row(j), gama, 0.0, comb_frame.row(j));
+            }
+        }
+
+        // Salvando video com efeitos aplicados
+        rnd &lt;&lt; comb_frame;
+    }
+    return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-17 09:36:57 -03
+Last updated 2018-04-18 14:11:01 -03
 </div>
 </div>
 </body>

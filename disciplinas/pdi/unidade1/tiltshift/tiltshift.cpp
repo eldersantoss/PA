@@ -65,9 +65,15 @@ int main(int argc, char** argv)
 {
     //Abrindo imagem passada por parâmetro
     org = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+
+    if(!org.data)
+    {
+        cerr << "Imagem nao carregou corretamente!!!" << endl;
+        return (-1);
+    }
+
     org.copyTo(borrada);
     org.copyTo(resultado);
-    teste = Mat(org.rows, org.cols, org.depth());
 
     namedWindow("Tiltshild", WINDOW_AUTOSIZE);
 
