@@ -26,8 +26,8 @@ int main(int argc, char** argv)
     }
 
     // Atribuindo valores aos parametros necessarios para abrir o canal de salvamento do video
-    const string video_name = "video-tiltshift.avi";
-    codec = CV_FOURCC('X','V','I','D');
+    const string video_name = "video-tiltshift.mp4";
+    codec = CV_FOURCC('H','2','6','4');
     FPS = cap.get(CV_CAP_PROP_FPS);
     width = (int) cap.get(CV_CAP_PROP_FRAME_WIDTH); height = (int) cap.get(CV_CAP_PROP_FRAME_HEIGHT);
     Size S = Size(width, height);
