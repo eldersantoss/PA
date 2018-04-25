@@ -32,38 +32,32 @@ void menu()
 int main(int argvc, char** argv)
 {
     VideoCapture video;
-    float media[] = {1, 1, 1,
-                     1, 1, 1,
-                     1, 1, 1
+    float media[] = {1,1,1,
+                     1,1,1,
+                     1,1,1
                     };
-    float gauss[] = {1, 2, 1,
-                     2, 4, 2,
-                     1, 2, 1
+    float gauss[] = {1,2,1,
+                     2,4,2,
+                     1,2,1
                     };
-    float horizontal[]= {-1, 0, 1,
-                         -2, 0, 2,
-                         -1, 0, 1
+    float horizontal[]= {-1,0,1,
+                         -2,0,2,
+                         -1,0,1
                         };
     float vertical[]= {-1,-2,-1,
-                       0, 0, 0,
-                       1, 2, 1
+                       0,0,0,
+                       1,2,1
                       };
-    float laplacian[]= {0,-1, 0,
+    float laplacian[]= {0,-1,0,
                         -1,4,-1,
-                        0,-1, 0
-                       };
-    float laplgauss[]= {0, 0,-1, 0, 0,
-                        0,-1,-2,-1, 0,
-                        -1,-2,16,-2,-1,
-                        0,-1,-2,-1, 0,
-                        0, 0,-1, 0, 0
+                        0,-1,0
                        };
 
     Mat cap, frame, frame32f, frameFiltered, frameFilteredLG;
     Mat mask(3,3,CV_32F), mask1;
     Mat result, result1;
     double width, height, min, max;
-    int absolut;
+    int absolut, laplgauss;
     char key;
 
     video.open(0);
@@ -80,30 +74,31 @@ int main(int argvc, char** argv)
     scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
     swap(mask, mask1);
     absolut=1; // calcs abs of the image
+    laplgauss=0; //ativa filtro laplaciano do gaussiano
 
     menu();
     for(;;)
     {
-        // Capturando quadro a partir do canal de vídeo:
         video >> cap;
-        // Convertendo p/ tons de cinza e espelhando verticalmente:
         cvtColor(cap, frame, CV_BGR2GRAY);
         flip(frame, frame, 1);
-        // Exibindo resultado:
         imshow("original", frame);
-        // Convertendo imagem inteira p/ float:
         frame.convertTo(frame32f, CV_32F);
-        // Aplicando filtro utilizando kernel selecionado e gerando novo frame para exibicao:
-        filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1,1), 0);
-        // Quando solicitado, tomando valor absoluto dos tons de cinza do frame:
-        if(absolut) frameFiltered=abs(frameFiltered);
-        // Convertendo novamente para inteiro:
+        if(laplgauss)
+        {
+            mask = Mat(3, 3, CV_32F, gauss);
+            filter2D(frame32f, frameFilteredLG, frame32f.depth(), mask, Point(1,1), 0);
+            mask = Mat(3, 3, CV_32F, laplacian);
+            filter2D(frameFilteredLG, frameFiltered, frameFilteredLG.depth(), mask, Point(1,1), 0);
+        }
+        else filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1,1), 0);
+        if(absolut)
+        {
+            frameFiltered=abs(frameFiltered);
+        }
         frameFiltered.convertTo(result, CV_8U);
-        // Exibindo resultado da filtragem:
         imshow("filtroespacial", result);
-        // Aguardando pelo pressionamento de uma tecla:
         key = (char) waitKey(10);
-        // Realizando acao correspondente a tecla pressionada (sair ou escolher kernel):
         if( key == 27 ) break; // esc pressed!
         switch(key)
         {
@@ -113,6 +108,7 @@ int main(int argvc, char** argv)
             break;
         case 'm':
             menu();
+            if(laplgauss) laplgauss=!laplgauss;
             mask = Mat(3, 3, CV_32F, media);
             scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
             mask = mask1;
@@ -121,6 +117,7 @@ int main(int argvc, char** argv)
             break;
         case 'g':
             menu();
+            if(laplgauss) laplgauss=!laplgauss;
             mask = Mat(3, 3, CV_32F, gauss);
             scaleAdd(mask, 1/16.0, Mat::zeros(3,3,CV_32F), mask1);
             mask = mask1;
@@ -129,26 +126,33 @@ int main(int argvc, char** argv)
             break;
         case 'h':
             menu();
+            if(laplgauss) laplgauss=!laplgauss;
             mask = Mat(3, 3, CV_32F, horizontal);
             cout << endl;
             printmask(mask);
             break;
         case 'v':
             menu();
+            if(laplgauss) laplgauss=!laplgauss;
             mask = Mat(3, 3, CV_32F, vertical);
             cout << endl;
             printmask(mask);
             break;
         case 'l':
             menu();
+            if(laplgauss) laplgauss=!laplgauss;
             mask = Mat(3, 3, CV_32F, laplacian);
             cout << endl;
             printmask(mask);
             break;
         case 'd':
             menu();
-            mask = Mat(5, 5, CV_32F, laplgauss);
+            laplgauss=1;
+            mask = Mat(3, 3, CV_32F, gauss);
             cout << endl;
+            printmask(mask);
+            cout << endl;
+            mask = Mat(3, 3, CV_32F, laplacian);
             printmask(mask);
             break;
         default:
