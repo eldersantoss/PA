@@ -6,7 +6,6 @@ using namespace cv;
 using namespace std;
 
 Mat org, borrada, resultado;
-vector<Mat> planes;
 
 double alpha, gama;
 int delta_slider=50, delta_slider_max = 100;
@@ -20,8 +19,6 @@ void on_trackbar_altura(int, void*)
 {
     int l = (delta_slider*org.rows)/(2*delta_slider_max);
     int centro = org.rows/2;
-
-    split(org, planes);
 
     //Preenchendo mat resultado linha por linha utilizando a função addWeighted
     for(int i=0; i<org.cols; i++)
