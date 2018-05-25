@@ -111,6 +111,8 @@ int main(int , char**){
 	       }
 	    }
 
+	    cout << y_H << "\t" << y_L << "\t" << c << "\t" << d0 << endl;
+
 	    // Salva o filtro homomórfico
 	    comps[0] = tmp; comps[1] = comps[0]; merge(comps, 2, filter);
 
@@ -190,6 +192,7 @@ int main(int , char**){
     split(complexImage, planos);
     // normaliza a parte real para exibicao
     normalize(planos[0], planos[0], 0, 1, CV_MINMAX);
+    imshow("filtro", tmp);
     imshow(window_name, planos[0]);
     key = (char) waitKey(10);
     if( key == 27 ) break; // esc pressed!

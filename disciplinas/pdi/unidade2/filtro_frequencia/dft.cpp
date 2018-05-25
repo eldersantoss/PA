@@ -2,8 +2,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#define RADIUS 20
-
 using namespace cv;
 using namespace std;
 

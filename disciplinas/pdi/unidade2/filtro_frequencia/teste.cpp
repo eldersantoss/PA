@@ -7,9 +7,9 @@ using namespace cv;
 using namespace std;
 
 // matrizes p/ armazenamento das imagens em cada etapa
-Mat imaginaryInput, complexImage, multsp;
-Mat image, imageln, padded, filter, mag;
-Mat tmp;
+Mat complexImage;
+Mat image, padded, filter;
+Mat tmp, result;
 Mat_<float> realInput, zeros;
 vector<Mat> planos;
 
@@ -18,9 +18,9 @@ vector<Mat> planos;
 int dft_M, dft_N;
 
 // variaveis de controle das trackbars de regulacao do filtro
-float gama, corte, aten, d;
-int x, y;
-int gama_slider = 0, gama_slider_max = 100;
+float g_h, g_l, corte, aten, d;
+int gamaH_slider = 0, gamaH_slider_max = 100;
+int gamaL_slider = 0, gamaL_slider_max = 100;
 int corte_slider = 0, corte_slider_max = 100;
 int aten_slider = 0, aten_slider_max = 100;
 char TrackbarName[50];
@@ -55,37 +55,66 @@ void deslocaDFT(Mat& image)
     tmp.copyTo(B);
 }
 
-void on_trackbar_gama(int, void*)
+void on_trackbar_filtro(int, void*)
 {
-    tmp = Mat::zeros(tmp.size(), CV_32F);
+    //tmp = Mat::zeros(tmp.size(), CV_32F);
 
-    gama = (float)(gama_slider_max - gama_slider)/100;
+    // recebendo valores das trackbars
+    g_h = gamaH_slider; g_l = gamaL_slider; corte = corte_slider; aten = aten_slider;
 
-    for(int i=0; i<tmp.rows; i++)
+    // preparando filtro homomorfico a partir dos valores das trackbars
+    for(int i=0; i<dft_M; i++)
     {
-        for(int j=0; j<tmp.cols; j++)
+        for(int j=0; j<dft_N; j++)
         {
-            d = (i-x)*(i-x)+(j-y)*(j-y);
-            if((i-x)*(i-x)+(j-y)*(j-y) <= corte*corte)
-                tmp.at<float>(i,j) = gama * (1 - exp(-1*aten*(d/(corte*corte))))+(float)gama_slider/100;
+            d = (i-dft_M/2)*(i-dft_M/2)+(j-dft_N/2)*(j-dft_N/2);
+            tmp.at<float>(i,j) = (g_h - g_l) * ((1 - exp(-1*aten*d/(corte*corte)))) + g_l;
         }
     }
 
-    // cria a matriz com as componentes do filtro e junta
-    // ambas em uma matriz multicanal complexa
+    // cria a matriz com as componentes do filtro e junta ambas em uma matriz multicanal complexa
     Mat comps[]= {tmp, tmp};
     merge(comps, 2, filter);
+
+    // cria a compoente real
+    realInput = Mat_<float>(padded);
+
+    // limpa o array de matrizes que vao compor a imagem complexa
+    planos.clear();
+
+    // insere as duas componentes no array de matrizes
+    planos.push_back(realInput);
+    planos.push_back(zeros);
+
+    // combina o array de matrizes em uma unica componente complexa
+    merge(planos, complexImage);
+
+    // aplicando logaritmo na imagem
+    for(int i=0; i < dft_M; i++)
+        for(int j=0; j < dft_N; j++)
+            planos[0].at<char>(i,j) = log(planos[0].at<char>(i,j)+1);
+
+    // calcula o dft
+    dft(complexImage, complexImage);
+
+    // realiza a troca de quadrantes
+    deslocaDFT(complexImage);
 
     // aplica o filtro frequencial
     mulSpectrums(complexImage,filter,complexImage,0);
 
+    // desloca novamente os quadrantes para posicao original
     deslocaDFT(complexImage);
 
+    // aplica transformacao inversa
     idft(complexImage, complexImage);
 
+    // normaliza os valores
+    normalize(complexImage, complexImage, 0, 1, CV_MINMAX);
+
     // aplicando exponencial a imagem transformada
-    for(int i=0; i<dft_M; i++)
-        for(int j=0; j<dft_N; j++)
+    for(int i=0; i < dft_M; i++)
+        for(int j=0; j < dft_N; j++)
             complexImage.at<char>(i,j) = exp(complexImage.at<char>(i,j));
 
     // limpa o array de planos
@@ -94,41 +123,33 @@ void on_trackbar_gama(int, void*)
     // separa as partes real e imaginaria para modifica-las
     split(complexImage, planos);
 
-    // normaliza a parte real para exibicao
-    normalize(planos[0], planos[0], 0, 1, CV_MINMAX);
+    // salvando imagem com filtro aplicado
+    imwrite("homomorfico.png", planos[0]);
+
+    // exibe resultado
     imshow("Homomorfico", planos[0]);
-}
 
-void on_trackbar_corte(int, void*)
-{
-    corte = corte_slider*(tmp.rows*0.7)/100;
-    on_trackbar_gama(gama_slider, 0);
-}
-
-void on_trackbar_aten(int, void*)
-{
-    aten = (float)(aten_slider*aten_slider)/100000;
-    on_trackbar_gama(gama_slider, 0);
 }
 
 int main(int argc, char** argv)
 {
     image = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
-
     namedWindow("Homomorfico", WINDOW_AUTOSIZE);
 
     //Criando primeira TrackBar
-    sprintf(TrackbarName, "Gama: ");
-    createTrackbar(TrackbarName, "Homomorfico", &gama_slider, gama_slider_max, on_trackbar_gama);
+    sprintf(TrackbarName, "Gama H: ");
+    createTrackbar(TrackbarName, "Homomorfico", &gamaH_slider, gamaH_slider_max, on_trackbar_filtro);
 
+    sprintf(TrackbarName, "Gama L: ");
+    createTrackbar(TrackbarName, "Homomorfico", &gamaL_slider, gamaL_slider_max, on_trackbar_filtro);
 
     //Criando segunda TrackBar
     sprintf(TrackbarName, "Corte: ");
-    createTrackbar(TrackbarName, "Homomorfico", &corte_slider, corte_slider_max, on_trackbar_corte);
+    createTrackbar(TrackbarName, "Homomorfico", &corte_slider, corte_slider_max, on_trackbar_filtro);
 
-    //Criando terceira TrackBar
+    //Criando quarta TrackBar
     sprintf(TrackbarName, "Atenuacao: ");
-    createTrackbar(TrackbarName, "Homomorfico", &aten_slider, aten_slider_max, on_trackbar_aten);
+    createTrackbar(TrackbarName, "Homomorfico", &aten_slider, aten_slider_max, on_trackbar_filtro);
 
     // identifica os tamanhos otimos para
     // calculo do FFT
@@ -141,53 +162,18 @@ int main(int argc, char** argv)
                    dft_N - image.cols,
                    BORDER_CONSTANT, Scalar::all(0));
 
-    // definindo centro do filtro
-    x = dft_M/2; y = dft_N/2;
+    // parte imaginaria da matriz complexa (preenchida com zeros)
+    zeros = Mat_<float>::zeros(padded.size());
 
     // prepara a matriz complexa para ser preenchida
     complexImage = Mat(padded.size(), CV_32FC2, Scalar(0));
 
-    // a função de transferência (filtro frequencial) deve ter o
-    // mesmo tamanho e tipo da matriz complexa
+    // a função de transferência (filtro frequencial) deve ter o mesmo tamanho e tipo da matriz complexa
     filter = complexImage.clone();
 
-    // cria uma matriz temporária para criar as componentes real
-    // e imaginaria do filtro ideal
+    // cria uma matriz temporária para criar as componentes real e imaginaria do filtro ideal
     tmp = Mat(dft_M, dft_N, CV_32F);
 
-    // parte imaginaria da matriz complexa (preenchida com zeros)
-    zeros = Mat_<float>::zeros(padded.size());
-
-    // cria a compoente real
-    realInput = Mat_<float>(padded);
-
-    // limpa o array de matrizes que vao compor a
-    // imagem complexa
-    planos.clear();
-
-    // insere as duas componentes no array de matrizes
-    planos.push_back(realInput);
-    planos.push_back(zeros);
-
-    // combina o array de matrizes em uma unica
-    // componente complexa
-    merge(planos, complexImage);
-
-    // aplicando logaritmo a imagem
-    for(int i=0; i<dft_M; i++)
-        for(int j=0; j<dft_N; j++)
-            complexImage.at<char>(i,j) = log(complexImage.at<char>(i,j)+1);
-
-    // calcula o dft
-    dft(complexImage, complexImage);
-
-    // realiza a troca de quadrantes
-    deslocaDFT(complexImage);
-
     waitKey(0);
-
-    // salvando imagem com filtro aplicado
-    imwrite("homomorfico.png", planos[0]);
-
     return 0;
 }
