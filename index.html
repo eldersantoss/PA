@@ -518,6 +518,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_7_filtro_homomórfico">7. Filtro homomórfico</a></li>
+<li><a href="#_8_kmeans">8. Kmeans</a></li>
 </ul>
 </div>
 </div>
@@ -1738,10 +1739,77 @@ Your browser does not support the video tag.
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_8_kmeans">8. Kmeans</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Para o exercício, foi pedido que se fizesse uma alteração no programa <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/kmeans/kmeans.cpp">kmeans.cpp</a>, para que a execução do código se desse com o parâmetro nRodadas = 1 e os centros fossem iniciados de forma aleatória usando o parâmetro KMEANS_RANDOM_CENTERS. Então, alterados esses parâmetros, realizar 10 rodadas diferentes do algoritmo. Código a seguir:</p>
+</div>
+<div class="paragraph">
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/kmeans/kmeans.cpp">kmeans.cpp</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">kmeans.cpp</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-cp">#include</span> <span class="tok-cpf">&lt;opencv2/opencv.hpp&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;cstdlib&gt;</span><span class="tok-cp"></span>
+
+<span class="tok-k">using</span> <span class="tok-k">namespace</span> <span class="tok-n">cv</span><span class="tok-p">;</span>
+
+<span class="tok-kt">int</span> <span class="tok-nf">main</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">argc</span><span class="tok-p">,</span> <span class="tok-kt">char</span><span class="tok-o">**</span> <span class="tok-n">argv</span> <span class="tok-p">){</span>
+  <span class="tok-kt">int</span> <span class="tok-n">nClusters</span> <span class="tok-o">=</span> <span class="tok-mi">6</span><span class="tok-p">;</span>
+  <span class="tok-n">Mat</span> <span class="tok-n">rotulos</span><span class="tok-p">;</span>
+  <span class="tok-kt">int</span> <span class="tok-n">nRodadas</span> <span class="tok-o">=</span> <span class="tok-mi">5</span><span class="tok-p">;</span>
+  <span class="tok-n">Mat</span> <span class="tok-n">centros</span><span class="tok-p">;</span>
+
+  <span class="tok-k">if</span><span class="tok-p">(</span><span class="tok-n">argc</span><span class="tok-o">!=</span><span class="tok-mi">3</span><span class="tok-p">){</span>
+	<span class="tok-n">exit</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+  <span class="tok-p">}</span>
+
+  <span class="tok-n">Mat</span> <span class="tok-n">img</span> <span class="tok-o">=</span> <span class="tok-n">imread</span><span class="tok-p">(</span> <span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">],</span> <span class="tok-n">CV_LOAD_IMAGE_COLOR</span><span class="tok-p">);</span>
+  <span class="tok-n">Mat</span> <span class="tok-n">samples</span><span class="tok-p">(</span><span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">rows</span> <span class="tok-o">*</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">cols</span><span class="tok-p">,</span> <span class="tok-mi">3</span><span class="tok-p">,</span> <span class="tok-n">CV_32F</span><span class="tok-p">);</span>
+
+  <span class="tok-k">for</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">y</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">y</span> <span class="tok-o">&lt;</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">;</span> <span class="tok-n">y</span><span class="tok-o">++</span> <span class="tok-p">){</span>
+    <span class="tok-k">for</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">x</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">x</span> <span class="tok-o">&lt;</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">cols</span><span class="tok-p">;</span> <span class="tok-n">x</span><span class="tok-o">++</span> <span class="tok-p">){</span>
+      <span class="tok-k">for</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">z</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">z</span> <span class="tok-o">&lt;</span> <span class="tok-mi">3</span><span class="tok-p">;</span> <span class="tok-n">z</span><span class="tok-o">++</span><span class="tok-p">){</span>
+        <span class="tok-n">samples</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">float</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span> <span class="tok-o">+</span> <span class="tok-n">x</span><span class="tok-o">*</span><span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">,</span> <span class="tok-n">z</span><span class="tok-p">)</span> <span class="tok-o">=</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-n">x</span><span class="tok-p">)[</span><span class="tok-n">z</span><span class="tok-p">];</span>
+	  <span class="tok-p">}</span>
+	<span class="tok-p">}</span>
+  <span class="tok-p">}</span>
+
+  <span class="tok-n">kmeans</span><span class="tok-p">(</span><span class="tok-n">samples</span><span class="tok-p">,</span>
+		 <span class="tok-n">nClusters</span><span class="tok-p">,</span>
+		 <span class="tok-n">rotulos</span><span class="tok-p">,</span>
+		 <span class="tok-n">TermCriteria</span><span class="tok-p">(</span><span class="tok-n">CV_TERMCRIT_ITER</span><span class="tok-o">|</span><span class="tok-n">CV_TERMCRIT_EPS</span><span class="tok-p">,</span> <span class="tok-mi">10000</span><span class="tok-p">,</span> <span class="tok-mf">0.0001</span><span class="tok-p">),</span>
+		 <span class="tok-n">nRodadas</span><span class="tok-p">,</span>
+		 <span class="tok-n">KMEANS_PP_CENTERS</span><span class="tok-p">,</span>
+		 <span class="tok-n">centros</span> <span class="tok-p">);</span>
+
+
+  <span class="tok-n">Mat</span> <span class="tok-n">rotulada</span><span class="tok-p">(</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">(),</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">type</span><span class="tok-p">()</span> <span class="tok-p">);</span>
+  <span class="tok-k">for</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">y</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">y</span> <span class="tok-o">&lt;</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">;</span> <span class="tok-n">y</span><span class="tok-o">++</span> <span class="tok-p">){</span>
+    <span class="tok-k">for</span><span class="tok-p">(</span> <span class="tok-kt">int</span> <span class="tok-n">x</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">x</span> <span class="tok-o">&lt;</span> <span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">cols</span><span class="tok-p">;</span> <span class="tok-n">x</span><span class="tok-o">++</span> <span class="tok-p">){</span>
+	  <span class="tok-kt">int</span> <span class="tok-n">indice</span> <span class="tok-o">=</span> <span class="tok-n">rotulos</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">int</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span> <span class="tok-o">+</span> <span class="tok-n">x</span><span class="tok-o">*</span><span class="tok-n">img</span><span class="tok-p">.</span><span class="tok-n">rows</span><span class="tok-p">,</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+	  <span class="tok-n">rotulada</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-n">x</span><span class="tok-p">)[</span><span class="tok-mi">0</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-p">(</span><span class="tok-n">uchar</span><span class="tok-p">)</span> <span class="tok-n">centros</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">float</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">indice</span><span class="tok-p">,</span> <span class="tok-mi">0</span><span class="tok-p">);</span>
+	  <span class="tok-n">rotulada</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-n">x</span><span class="tok-p">)[</span><span class="tok-mi">1</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-p">(</span><span class="tok-n">uchar</span><span class="tok-p">)</span> <span class="tok-n">centros</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">float</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">indice</span><span class="tok-p">,</span> <span class="tok-mi">1</span><span class="tok-p">);</span>
+	  <span class="tok-n">rotulada</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">Vec3b</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-n">x</span><span class="tok-p">)[</span><span class="tok-mi">2</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-p">(</span><span class="tok-n">uchar</span><span class="tok-p">)</span> <span class="tok-n">centros</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-kt">float</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">indice</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">);</span>
+	<span class="tok-p">}</span>
+  <span class="tok-p">}</span>
+  <span class="tok-n">imshow</span><span class="tok-p">(</span> <span class="tok-s">&quot;clustered image&quot;</span><span class="tok-p">,</span> <span class="tok-n">rotulada</span> <span class="tok-p">);</span>
+  <span class="tok-n">imwrite</span><span class="tok-p">(</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">2</span><span class="tok-p">],</span> <span class="tok-n">rotulada</span><span class="tok-p">);</span>
+  <span class="tok-n">waitKey</span><span class="tok-p">(</span> <span class="tok-mi">0</span> <span class="tok-p">);</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As 10 imagens resultantes do algoritmo, juntamente com a imagem original, podem ser visualizadas <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/kmeans/imagens">aqui</a>.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-05-25 17:36:29 -03
+Last updated 2018-05-26 13:02:16 -03
 </div>
 </div>
 </body>
