@@ -1,12 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <fstream>
-#include <iomanip>
 #include <vector>
-#include <algorithm>
 #include <numeric>
-#include <ctime>
-#include <cstdlib>
 
 using namespace std;
 using namespace cv;
