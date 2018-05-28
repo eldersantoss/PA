@@ -518,6 +518,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_7_filtro_homomórfico">7. Filtro homomórfico</a></li>
+<li><a href="#_8_arte_com_pontilhismo">8. Arte com pontilhismo</a></li>
 <li><a href="#_9_kmeans">9. Kmeans</a></li>
 </ul>
 </div>
@@ -1740,6 +1741,154 @@ Your browser does not support the video tag.
 </div>
 </div>
 <div class="sect1">
+<h2 id="_8_arte_com_pontilhismo">8. Arte com pontilhismo</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Neste exercício, solicitou-se a implementação de um algoritmo, baseado nos códigos <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/canny/canny.cpp">canny.cpp</a> e <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/canny/pontilhismo.cpp">pontilhismo.cpp</a> que realizasse um efeito artístico em uma fotografia, simulando uma pintura.</p>
+</div>
+<div class="paragraph">
+<p>Download do código <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/canny/cannypoints.cpp">cannypoints.cpp</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">cannypoints.cpp</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-cp">#include</span> <span class="tok-cpf">&lt;iostream&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;opencv2/opencv.hpp&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;fstream&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;iomanip&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;vector&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;algorithm&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;numeric&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;ctime&gt;</span><span class="tok-cp"></span>
+<span class="tok-cp">#include</span> <span class="tok-cpf">&lt;cstdlib&gt;</span><span class="tok-cp"></span>
+
+<span class="tok-k">using</span> <span class="tok-k">namespace</span> <span class="tok-n">std</span><span class="tok-p">;</span>
+<span class="tok-k">using</span> <span class="tok-k">namespace</span> <span class="tok-n">cv</span><span class="tok-p">;</span>
+
+<span class="tok-cp">#define STEP 10</span>
+<span class="tok-cp">#define JITTER 3</span>
+
+<span class="tok-n">Mat</span> <span class="tok-n">image</span><span class="tok-p">,</span> <span class="tok-n">points</span><span class="tok-p">;</span>
+
+<span class="tok-kt">int</span> <span class="tok-n">width</span><span class="tok-p">,</span> <span class="tok-n">height</span><span class="tok-p">,</span> <span class="tok-n">gray</span><span class="tok-p">;</span>
+
+<span class="tok-kt">float</span> <span class="tok-n">RAIO</span> <span class="tok-o">=</span> <span class="tok-mf">10.0</span><span class="tok-p">;</span>
+
+<span class="tok-kt">void</span> <span class="tok-nf">pontilhismo</span><span class="tok-p">()</span>
+<span class="tok-p">{</span>
+    <span class="tok-kt">int</span> <span class="tok-n">x</span><span class="tok-p">,</span><span class="tok-n">y</span><span class="tok-p">;</span>
+    <span class="tok-n">vector</span><span class="tok-o">&lt;</span><span class="tok-kt">int</span><span class="tok-o">&gt;</span> <span class="tok-n">yrange</span><span class="tok-p">;</span>
+    <span class="tok-n">vector</span><span class="tok-o">&lt;</span><span class="tok-kt">int</span><span class="tok-o">&gt;</span> <span class="tok-n">xrange</span><span class="tok-p">;</span>
+
+    <span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">resize</span><span class="tok-p">(</span><span class="tok-n">height</span><span class="tok-o">/</span><span class="tok-n">STEP</span><span class="tok-p">);</span>
+    <span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">resize</span><span class="tok-p">(</span><span class="tok-n">width</span><span class="tok-o">/</span><span class="tok-n">STEP</span><span class="tok-p">);</span>
+
+    <span class="tok-n">iota</span><span class="tok-p">(</span><span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">begin</span><span class="tok-p">(),</span> <span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">end</span><span class="tok-p">(),</span> <span class="tok-mi">0</span><span class="tok-p">);</span>
+    <span class="tok-n">iota</span><span class="tok-p">(</span><span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">begin</span><span class="tok-p">(),</span> <span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">end</span><span class="tok-p">(),</span> <span class="tok-mi">0</span><span class="tok-p">);</span>
+
+    <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-n">uint</span> <span class="tok-n">i</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">i</span><span class="tok-o">&lt;</span><span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">();</span> <span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span>
+    <span class="tok-p">{</span>
+        <span class="tok-n">xrange</span><span class="tok-p">[</span><span class="tok-n">i</span><span class="tok-p">]</span><span class="tok-o">=</span> <span class="tok-n">xrange</span><span class="tok-p">[</span><span class="tok-n">i</span><span class="tok-p">]</span><span class="tok-o">*</span><span class="tok-n">STEP</span><span class="tok-o">+</span><span class="tok-n">STEP</span><span class="tok-o">/</span><span class="tok-mi">2</span><span class="tok-p">;</span>
+    <span class="tok-p">}</span>
+
+    <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-n">uint</span> <span class="tok-n">i</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">i</span><span class="tok-o">&lt;</span><span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">();</span> <span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span>
+    <span class="tok-p">{</span>
+        <span class="tok-n">yrange</span><span class="tok-p">[</span><span class="tok-n">i</span><span class="tok-p">]</span><span class="tok-o">=</span> <span class="tok-n">yrange</span><span class="tok-p">[</span><span class="tok-n">i</span><span class="tok-p">]</span><span class="tok-o">*</span><span class="tok-n">STEP</span><span class="tok-o">+</span><span class="tok-n">STEP</span><span class="tok-o">/</span><span class="tok-mi">2</span><span class="tok-p">;</span>
+    <span class="tok-p">}</span>
+
+    <span class="tok-n">points</span> <span class="tok-o">=</span> <span class="tok-n">Mat</span><span class="tok-p">(</span><span class="tok-n">height</span><span class="tok-p">,</span> <span class="tok-n">width</span><span class="tok-p">,</span> <span class="tok-n">CV_8U</span><span class="tok-p">,</span> <span class="tok-n">Scalar</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">));</span>
+
+    <span class="tok-n">random_shuffle</span><span class="tok-p">(</span><span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">begin</span><span class="tok-p">(),</span> <span class="tok-n">xrange</span><span class="tok-p">.</span><span class="tok-n">end</span><span class="tok-p">());</span>
+
+    <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-k">auto</span> <span class="tok-nl">i</span> <span class="tok-p">:</span> <span class="tok-n">xrange</span><span class="tok-p">)</span>
+    <span class="tok-p">{</span>
+        <span class="tok-n">random_shuffle</span><span class="tok-p">(</span><span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">begin</span><span class="tok-p">(),</span> <span class="tok-n">yrange</span><span class="tok-p">.</span><span class="tok-n">end</span><span class="tok-p">());</span>
+        <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-k">auto</span> <span class="tok-nl">j</span> <span class="tok-p">:</span> <span class="tok-n">yrange</span><span class="tok-p">)</span>
+        <span class="tok-p">{</span>
+            <span class="tok-n">x</span> <span class="tok-o">=</span> <span class="tok-n">i</span><span class="tok-o">+</span><span class="tok-n">rand</span><span class="tok-p">()</span><span class="tok-o">%</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-o">*</span><span class="tok-n">JITTER</span><span class="tok-p">)</span><span class="tok-o">-</span><span class="tok-n">JITTER</span><span class="tok-o">+</span><span class="tok-mi">1</span><span class="tok-p">;</span>
+            <span class="tok-n">y</span> <span class="tok-o">=</span> <span class="tok-n">j</span><span class="tok-o">+</span><span class="tok-n">rand</span><span class="tok-p">()</span><span class="tok-o">%</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-o">*</span><span class="tok-n">JITTER</span><span class="tok-p">)</span><span class="tok-o">-</span><span class="tok-n">JITTER</span><span class="tok-o">+</span><span class="tok-mi">1</span><span class="tok-p">;</span>
+            <span class="tok-n">gray</span> <span class="tok-o">=</span> <span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">uchar</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">x</span><span class="tok-p">,</span><span class="tok-n">y</span><span class="tok-p">);</span>
+            <span class="tok-n">circle</span><span class="tok-p">(</span><span class="tok-n">points</span><span class="tok-p">,</span>
+                   <span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Point</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span><span class="tok-n">x</span><span class="tok-p">),</span>
+                   <span class="tok-n">RAIO</span><span class="tok-p">,</span>
+                   <span class="tok-n">CV_RGB</span><span class="tok-p">(</span><span class="tok-n">gray</span><span class="tok-p">,</span><span class="tok-n">gray</span><span class="tok-p">,</span><span class="tok-n">gray</span><span class="tok-p">),</span>
+                   <span class="tok-o">-</span><span class="tok-mi">1</span><span class="tok-p">,</span>
+                   <span class="tok-n">CV_AA</span><span class="tok-p">);</span>
+        <span class="tok-p">}</span>
+    <span class="tok-p">}</span>
+<span class="tok-p">}</span>
+
+<span class="tok-kt">void</span> <span class="tok-nf">canny</span><span class="tok-p">()</span>
+<span class="tok-p">{</span>
+    <span class="tok-n">Mat</span> <span class="tok-n">border</span><span class="tok-p">;</span>
+    <span class="tok-kt">int</span> <span class="tok-n">i</span><span class="tok-p">,</span> <span class="tok-n">j</span><span class="tok-p">,</span> <span class="tok-n">k</span><span class="tok-p">,</span> <span class="tok-n">T1</span> <span class="tok-o">=</span> <span class="tok-mi">1</span><span class="tok-p">;</span>
+
+    <span class="tok-c1">// executando 5 vezes o algoritmo de canny para 5 limeares diferentes</span>
+    <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-n">i</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">i</span><span class="tok-o">&lt;</span><span class="tok-mi">5</span><span class="tok-p">;</span> <span class="tok-n">i</span><span class="tok-o">++</span><span class="tok-p">)</span>
+    <span class="tok-p">{</span>
+        <span class="tok-n">Canny</span><span class="tok-p">(</span><span class="tok-n">image</span><span class="tok-p">,</span> <span class="tok-n">border</span><span class="tok-p">,</span> <span class="tok-n">T1</span><span class="tok-p">,</span> <span class="tok-mi">3</span><span class="tok-o">*</span><span class="tok-n">T1</span><span class="tok-p">);</span>
+        <span class="tok-c1">// incrementando limear</span>
+        <span class="tok-n">T1</span> <span class="tok-o">+=</span> <span class="tok-mi">10</span><span class="tok-p">;</span>
+
+        <span class="tok-c1">// gerando pontos menores na imagem pontilhista para posicoes de borda</span>
+        <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-n">j</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">j</span><span class="tok-o">&lt;</span><span class="tok-n">height</span><span class="tok-p">;</span> <span class="tok-n">j</span><span class="tok-o">++</span><span class="tok-p">)</span>
+        <span class="tok-p">{</span>
+            <span class="tok-k">for</span><span class="tok-p">(</span><span class="tok-n">k</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">;</span> <span class="tok-n">k</span><span class="tok-o">&lt;</span><span class="tok-n">width</span><span class="tok-p">;</span> <span class="tok-n">k</span><span class="tok-o">++</span><span class="tok-p">)</span>
+            <span class="tok-p">{</span>
+                <span class="tok-k">if</span><span class="tok-p">(</span><span class="tok-n">border</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">uchar</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">j</span><span class="tok-p">,</span><span class="tok-n">k</span><span class="tok-p">)</span><span class="tok-o">==</span><span class="tok-mi">255</span><span class="tok-p">)</span>
+                <span class="tok-p">{</span>
+                    <span class="tok-n">gray</span> <span class="tok-o">=</span> <span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">at</span><span class="tok-o">&lt;</span><span class="tok-n">uchar</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">j</span><span class="tok-p">,</span><span class="tok-n">k</span><span class="tok-p">);</span>
+                    <span class="tok-n">circle</span><span class="tok-p">(</span><span class="tok-n">points</span><span class="tok-p">,</span><span class="tok-n">cv</span><span class="tok-o">::</span><span class="tok-n">Point</span><span class="tok-p">(</span><span class="tok-n">k</span><span class="tok-p">,</span><span class="tok-n">j</span><span class="tok-p">),</span><span class="tok-n">RAIO</span><span class="tok-p">,</span><span class="tok-n">CV_RGB</span><span class="tok-p">(</span><span class="tok-n">gray</span><span class="tok-p">,</span><span class="tok-n">gray</span><span class="tok-p">,</span><span class="tok-n">gray</span><span class="tok-p">),</span><span class="tok-o">-</span><span class="tok-mi">1</span><span class="tok-p">,</span><span class="tok-n">CV_AA</span><span class="tok-p">);</span>
+                <span class="tok-p">}</span>
+            <span class="tok-p">}</span>
+        <span class="tok-p">}</span>
+
+        <span class="tok-c1">// diminuindo raio do circulo para proxima iterecao</span>
+        <span class="tok-n">RAIO</span> <span class="tok-o">-=</span> <span class="tok-mf">1.5</span><span class="tok-p">;</span>
+    <span class="tok-p">}</span>
+
+<span class="tok-p">}</span>
+
+<span class="tok-kt">int</span> <span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-kt">int</span> <span class="tok-n">argc</span><span class="tok-p">,</span> <span class="tok-kt">char</span><span class="tok-o">**</span> <span class="tok-n">argv</span><span class="tok-p">)</span>
+<span class="tok-p">{</span>
+    <span class="tok-n">image</span><span class="tok-o">=</span> <span class="tok-n">imread</span><span class="tok-p">(</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">],</span><span class="tok-n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="tok-p">);</span>
+
+    <span class="tok-k">if</span><span class="tok-p">(</span><span class="tok-o">!</span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-p">{</span>
+        <span class="tok-n">cout</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-s">&quot;nao abriu&quot;</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-n">endl</span><span class="tok-p">;</span>
+        <span class="tok-n">cout</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-s">&quot; imagem.jpg&quot;</span><span class="tok-p">;</span>
+        <span class="tok-n">exit</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">);</span>
+    <span class="tok-p">}</span>
+
+    <span class="tok-n">width</span><span class="tok-o">=</span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">().</span><span class="tok-n">width</span><span class="tok-p">;</span>
+    <span class="tok-n">height</span><span class="tok-o">=</span><span class="tok-n">image</span><span class="tok-p">.</span><span class="tok-n">size</span><span class="tok-p">().</span><span class="tok-n">height</span><span class="tok-p">;</span>
+
+    <span class="tok-n">pontilhismo</span><span class="tok-p">();</span>
+    <span class="tok-n">canny</span><span class="tok-p">();</span>
+
+    <span class="tok-n">imwrite</span><span class="tok-p">(</span><span class="tok-s">&quot;cannypoints.jpg&quot;</span><span class="tok-p">,</span> <span class="tok-n">points</span><span class="tok-p">);</span>
+    <span class="tok-k">return</span> <span class="tok-mi">0</span><span class="tok-p">;</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="disciplinas/pdi/unidade2/canny/elder.jpg" alt="elder">
+</div>
+<div class="title">Figure 14. Imagem original</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="disciplinas/pdi/unidade2/canny/cannypoints.jpg" alt="cannypoints">
+</div>
+<div class="title">Figure 15. Imagem com efeito</div>
+</div>
+<div class="paragraph">
+<p>Para gerar este efeito na imagem, inicialmente aplicou-se o algorítmo <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/canny/pontilhismo.cpp">pontilhismo.cpp</a> com os parâmetros RAIO = 10, STEP = 10 e JITTER = 3, gerando uma imagem formada unicamente por pontos. Depois, de posse da imagem pontilhada, aplicou-se o algorítmo <a href="https://eldersantoss.github.io/disciplinas/pdi/unidade2/canny/canny.cpp">canny.cpp</a> cinco vezes, cada uma delas com um limear T1 diferente (T1 iniciando em 1 e sendo incrementado de 10 unidades em cada rodada do algorítmo). Em cada aplicação do canny, encontrou-se uma dada quantidade de bordas e, nas respectivas posições destas bordas encontradas, diminuiu-se o raio dos circulos na imagem pontilhada, fazendo com que as bordas tivessem um destaque diferente para cada novo limear, o que causou o efeito visualizado acima.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_9_kmeans">9. Kmeans</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1812,7 +1961,7 @@ Your browser does not support the video tag.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-05-26 13:26:07 -03
+Last updated 2018-05-28 19:12:24 -03
 </div>
 </div>
 </body>
