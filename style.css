@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;1,300&display=swap");
+
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+header {
+  height: 100vh;
+  /* min-width: 1024px; */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  font-size: 1rem;
+  background: no-repeat center/cover url("assets/criativi-background.png");
+}
+
+header h1 {
+  color: #e76224;
+  font-weight: 100;
+  margin: 100px;
+}
+
+header h1 span {
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  header {
+    font-size: 0.8rem;
+    background: no-repeat center/cover
+      url("assets/criativi-background-vert.png");
+  }
+}
